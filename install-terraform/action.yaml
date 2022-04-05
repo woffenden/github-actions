@@ -35,5 +35,5 @@ runs:
         rm -rf terraform_${terraformVersion}_linux_amd64.zip
       shell: bash
 
-    - run:  echo "${{ inputs.install-dir }}" >> ${GITHUB_PATH}
+    - run:  echo "${{ inputs.install_directory }}" >> ${GITHUB_PATH}
       shell: bash
