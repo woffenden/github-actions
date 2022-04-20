@@ -1,0 +1,35 @@
+name: 'standard-terraform-deployment'
+description: 'Performs a standard Terraform deployment'
+
+inputs:
+  working_directory:
+    description: 'Directory to change into'
+    required: true
+  terraform_version:
+    description: 'Version of Terraform to install'
+    required: true
+    default: 'latest'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Terraform
+      uses: woffenden/github-actions/install-terraform@alpha
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+
+    - name: Initialise Terraform
+      run: terragrunt init -upgrade
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
+
+    - name: Terraform Plan
+      run: terragrunt plan
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terragrunt apply -auto-approve
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
