@@ -1,0 +1,39 @@
+name: 'install-terraform'
+description: 'Installs Terraform'
+
+inputs:
+  terraform_version:
+    description: 'Version of Terraform to install'
+    required: true
+    default: 'latest'
+  install_directory:
+    description: 'Where to install Terraform binary'
+    required: true
+    default: '${HOME}/.terraform'
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        if [[ "${{ inputs.terraform_version }}" == "latest" ]]; then
+          terraformVersion=$( curl --silent https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r '.tag_name' | sed 's|v||' )
+          echo "Terraform Version: ${terraformVersion}"
+        else
+          terraformVersion="${{ inputs.terraform_version }}"
+          echo "Terraform Version: ${terraformVersion}"
+        fi
+
+        mkdir --parents "${{ inputs.install_directory }}"
+
+        pushd "${{ inputs.install_directory }}"
+
+        curl https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip \
+          --output terraform_${terraformVersion}_linux_amd64.zip
+
+        unzip -q terraform_${terraformVersion}_linux_amd64.zip
+        
+        rm -rf terraform_${terraformVersion}_linux_amd64.zip
+      shell: bash
+
+    - run:  echo "${{ inputs.install_directory }}" >> ${GITHUB_PATH}
+      shell: bash
